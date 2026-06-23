@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Nueva Convocatoria - Compuedu</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- LÓGICA DE MAPAS: Estilos y Scripts de Leaflet API -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top right, #f8fafc 0%, #e2e8f0 100%);
+            background-attachment: fixed;
+            color: #1e293b;
+        }
+
+        /* Navbar Minimalista */
+        .navbar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .navbar-brand { 
+            font-weight: 700; 
+            color: #0f172a !important;
+            letter-spacing: -0.5px;
+        }
+
+        /* Contenedor del Formulario */
+        .card-form {
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.04);
+            background: #ffffff;
+        }
+
+        .icon-header-box {
+            width: 64px;
+            height: 64px;
+            background: #eef2ff;
+            color: #6366f1;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.2rem;
+        }
+
+        /* Inputs y Campos Modernos */
+        .form-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.6rem;
+        }
+        
+        .input-group {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            transition: all 0.25s ease;
+            overflow: hidden;
+        }
+        
+        .input-group-text {
+            background-color: transparent;
+            border: none;
+            color: #94a3b8;
+            padding-left: 1.2rem;
+            padding-right: 0.6rem;
+        }
+        
+        .form-control, .form-select {
+            background-color: transparent;
+            border: none;
+            padding: 0.75rem 1.2rem 0.75rem 0.4rem;
+            color: #0f172a;
+            font-size: 0.95rem;
+        }
+        
+        .form-control::placeholder {
+            color: #94a3b8;
+        }
+        
+        /* Efecto de enfoque unificado */
+        .input-group:focus-within {
+            border-color: #6366f1;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+        }
+        
+        .input-group:focus-within .input-group-text {
+            color: #6366f1;
+        }
+
+        /* Selectores de Pestañas Multimedia */
+        .nav-pills .nav-link {
+            color: #64748b;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border-radius: 10px;
+            padding: 0.5rem 1.2rem;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #6366f1;
+            color: white;
+        }
+
+        /* Botones del Sistema */
+        .btn-cancel {
+            background: #f1f5f9;
+            color: #64748b;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-cancel:hover {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            border: none;
+            color: white;
+            transition: all 0.25s ease;
+        }
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.25);
+            color: white;
+            opacity: 0.95;
+        }
+
+        .info-badge {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #dcfce7;
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg sticky-top mb-5 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="#">
+            <i class="fas fa-graduation-cap text-indigo fs-4 me-2" style="color: #6366f1;"></i>
+            <span>Compuedu<span style="color: #6366f1;">Admin</span></span>
+        </a>
+        <div class="d-flex align-items-center">
+            <a th:href="@{/dashboard}" class="btn btn-cancel btn-sm rounded-pill px-3 fw-medium">
+                <i class="fas fa-times me-1"></i> Salir
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+            
+            <div class="card card-form p-4 p-md-5">
+                <div class="text-center mb-5">
+                    <div class="icon-header-box">
+                        <i class="fas fa-bullhorn fa-xl"></i>
+                    </div>
+                    <h3 class="fw-bold tracking-tight" style="color: #0f172a;">Nueva Convocatoria</h3>
+                    <p class="text-muted small mb-0">Completa la información para publicar una nueva oferta en la plataforma.</p>
+                </div>
+                
+                <div class="card-body p-0">
+                    <!-- ¡CORREGIDO!: multipart/form-data añadido para transmisión híbrida de imágenes -->
+                    <form th:action="@{/convocatorias/guardar}" th:object="${convocatoria}" method="post" enctype="multipart/form-data">
+                        
+                        <!-- Título -->
+                        <div class="mb-4">
+                            <label class="form-label">Título de la Convocatoria</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-heading"></i></span>
+                                <input type="text" th:field="*{titulo}" class="form-control" placeholder="Ej: Beca de Excelencia Académica" required>
+                            </div>
+                        </div>
+
+                        <!-- Categoría y Vacantes -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Tipo de Oportunidad</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-tags"></i></span>
+                                    <select th:field="*{categoria}" class="form-select" style="border-left: none;" required>
+                                        <option value="Beca">Beca</option>
+                                        <option value="Curso">Curso</option>
+                                        <option value="Pasantia">Pasantía</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Cupos / Vacantes</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-users"></i></span>
+                                    <input type="number" th:field="*{vacantes}" class="form-control" min="1" placeholder="Ej: 25" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Descripción Detallada -->
+                        <div class="mb-4">
+                            <label class="form-label">Descripción General y Detalles</label>
+                            <div class="input-group">
+                                <span class="input-group-text align-items-start pt-3"><i class="fas fa-align-left"></i></span>
+                                <textarea th:field="*{descripcion}" class="form-control" rows="5" placeholder="Escribe detalladamente los beneficios, documentación requerida y perfiles admitidos..." required></textarea>
+                            </div>
+                        </div>
+
+                        <!-- NUEVA SECCIÓN: IMAGEN HÍBRIDA DE PORTADA -->
+                        <div class="mb-4">
+                            <label class="form-label">Imagen Destacada de la Oferta</label>
+                            
+                            <!-- Tabs de Navegación Multimedia -->
+                            <ul class="nav nav-pills mb-2" id="multimediaTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="local-tab" data-bs-toggle="pill" data-bs-target="#panel-local" type="button" role="tab">
+                                        <i class="fas fa-laptop me-1"></i> Desde mi PC
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="url-tab" data-bs-toggle="pill" data-bs-target="#panel-url" type="button" role="tab">
+                                        <i class="fas fa-link me-1"></i> Dirección URL
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <!-- Contenido de Paneles -->
+                            <div class="tab-content border p-3 rounded-3 bg-light bg-opacity-50">
+                                <!-- Desde PC -->
+                                <div class="tab-pane fade show active" id="panel-local" role="tabpanel">
+                                    <input class="form-control bg-white border" type="file" id="imagenLocal" name="imagenLocal" accept="image/*">
+                                    <div class="form-text small text-muted mt-1">Archivos recomendados: PNG o JPG de hasta 2MB.</div>
+                                </div>
+                                <!-- Desde URL -->
+                                <div class="tab-pane fade" id="panel-url" role="tabpanel">
+                                    <div class="input-group bg-white">
+                                        <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                                        <input type="url" class="form-control" id="imagenUrlInput" name="imagenUrlInput" placeholder="https://ejemplo.com/banners/oferta.jpg">
+                                    </div>
+                                    <div class="form-text small text-muted mt-1">Pega el link directo a una imagen pública de internet.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- NUEVA SECCIÓN: MAPA DE UBICACIÓN INTERACTIVO -->
+                        <div class="mb-4">
+                            <label class="form-label">Dirección / Sede Física del Programa</label>
+                            <p class="text-muted small mb-2">Haz un clic sobre el mapa para fijar la ubicación exacta donde los alumnos asistirán.</p>
+                            
+                            <!-- Contenedor Visual del Mapa -->
+                            <div id="mapa-seleccion" class="rounded-3 shadow-sm" style="height: 320px; border: 1px solid #cbd5e1; z-index: 1;"></div>
+                            
+                            <!-- Inputs Ocultos de Coordinadas para Spring Boot -->
+                            <input type="hidden" id="latitud" name="latitud">
+                            <input type="hidden" id="longitud" name="longitud">
+                        </div>
+
+                        <!-- Fechas (Inicio y Cierre) -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Fecha de Apertura</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="far fa-calendar-check"></i></span>
+                                    <input type="date" th:field="*{fechaInicio}" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Fecha Límite de Cierre</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="far fa-calendar-times text-danger"></i></span>
+                                    <input type="date" th:field="*{fechaFin}" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notificación Banner -->
+                        <div class="info-badge mb-5 d-flex align-items-center">
+                            <i class="fas fa-bolt me-3 fs-5"></i>
+                            <span>Al guardar, el sistema cruzará perfiles y enviará una alerta automática a los estudiantes que sigan esta categoría.</span>
+                        </div>
+
+                        <!-- Botones de Acción -->
+                        <div class="d-grid gap-3 d-md-flex justify-content-md-end align-items-center">
+                            <a th:href="@{/dashboard}" class="btn btn-cancel rounded-xl px-4 py-2.5 fw-semibold small">
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-save rounded-xl px-5 py-2.5 fw-semibold shadow-sm">
+                                <i class="fas fa-paper-plane me-2"></i> Publicar Ahora
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- SCRIPT GEOGRÁFICO DE CAPTURA -->
+<script>
+    // 1. Inicializar el mapa centrado en Bogotá por defecto (coordenadas estándar de Colombia)
+    const mapa = L.map('mapa-seleccion').setView([4.6097, -74.0817], 12);
+
+    // 2. Montar las texturas de mapa libre de OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(mapa);
+
+    let marcador = null;
+
+    // 3. Capturador de clics en el plano del mapa
+    mapa.on('click', function(e) {
+        const lat = e.latlng.lat;
+        const lng = e.latlng.lng;
+
+        // Si ya hay un pin colocado, lo reposiciona, de lo contrario crea uno nuevo
+        if (marcador) {
+            marcador.setLatLng(e.latlng);
+        } else {
+            marcador = L.marker(e.latlng).addTo(mapa);
+        }
+
+        // Transferir las variables numéricas a los campos ocultos del formulario
+        document.getElementById('latitud').value = lat;
+        document.getElementById('longitud').value = lng;
+    });
+</script>
+
+</body>
+</html>

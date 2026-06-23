@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Mi Portal Estudiantil - Compuedu</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            --success-gradient: linear-gradient(135deg, #10b981 0%, #047857 100%);
+            --secondary-gradient: linear-gradient(135deg, #64748b 0%, #334155 100%);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+            --card-hover-shadow: 0 20px 40px -5px rgba(59, 130, 246, 0.12);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f4f7fa;
+            color: #1e293b;
+        }
+
+        /* Navbar Minimalista */
+        .navbar {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02) !important;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        /* Hero Banner Premium */
+        .hero-banner {
+            background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.12) 0%, rgba(30, 58, 138, 0.02) 80%), white;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: var(--card-shadow);
+            padding: 2.5rem;
+        }
+
+        /* Tarjetas de Acción Evolucionadas */
+        .action-card {
+            border: none;
+            border-radius: 24px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            background: white;
+            height: 100%;
+            position: relative;
+            text-decoration: none !important;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .action-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .action-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: var(--primary-gradient);
+            transition: all 0.4s ease;
+        }
+
+        .action-card.card-success::before {
+            background: var(--success-gradient);
+        }
+
+        .action-card.card-secondary::before {
+            background: var(--secondary-gradient);
+        }
+
+        .action-card:hover::before {
+            height: 12px;
+        }
+
+        /* Círculos de Iconos de Contraste Suave */
+        .icon-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.25rem;
+            font-size: 1.35rem;
+            transition: all 0.3s ease;
+        }
+
+        .bg-light-primary {
+            background-color: #eff6ff;
+            color: #2563eb;
+        }
+
+        .bg-light-success {
+            background-color: #ecfdf5;
+            color: #10b981;
+        }
+
+        .bg-light-secondary {
+            background-color: #f8fafc;
+            color: #475569;
+        }
+
+        .action-card:hover .icon-circle {
+            transform: scale(1.05);
+        }
+
+        /* Botones de Tarjeta Estilizados */
+        .btn-card-action {
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 0.6rem 1.2rem;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        /* Estructura de Contenedor de Tabla (Glassmorphism) */
+        .table-card {
+            border: none;
+            border-radius: 24px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .table-card .card-header {
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .table thead th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+            border-bottom: 1px solid #e2e8f0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.75rem;
+            padding: 1rem 1.25rem;
+        }
+
+        .table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(241, 245, 249, 0.5) !important;
+        }
+
+        .table td {
+            padding: 1.1rem 1.25rem;
+            vertical-align: middle;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        /* Badges de Estado Rediseñados Dinámicos */
+        .badge-soft-success {
+            background-color: #dcfce7;
+            color: #15803d;
+            font-weight: 700;
+            font-size: 0.75rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            border: 1px solid #bbf7d0;
+        }
+
+        .badge-soft-warning {
+            background-color: #fef9c3;
+            color: #854d0e;
+            font-weight: 700;
+            font-size: 0.75rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            border: 1px solid #fef08a;
+        }
+
+        .badge-soft-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+            font-weight: 700;
+            font-size: 0.75rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            border: 1px solid #fecaca;
+        }
+
+        .btn-logout {
+            border-radius: 50px;
+            padding: 0.4rem 1.2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        /* Botón PDF Flotante */
+        .btn-pdf-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            transition: all 0.2s;
+            background-color: #fef2f2;
+            color: #ef4444;
+            border: 1px solid #fee2e2;
+        }
+
+        .btn-pdf-icon:hover {
+            background-color: #ef4444;
+            color: white;
+            border-color: #ef4444;
+            transform: scale(1.05);
+        }
+
+        /* Personalización de Barra de Desplazamiento del Dropdown */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg sticky-top py-3">
+        <div class="container">
+            <a class="navbar-brand text-dark d-flex align-items-center" href="#">
+                <div class="bg-primary text-white p-2 rounded-3 me-2 d-flex align-items-center justify-content-center"
+                    style="width: 36px; height: 36px; background: var(--primary-gradient) !important;">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <span>Compuedu <span class="text-primary" style="font-weight: 400;">Portal</span></span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="fas fa-bars text-secondary"></i>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
+                    <div class="d-none d-md-block text-end">
+                        <small class="d-block text-muted"
+                            style="font-size: 0.7rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px;">Bienvenido,</small>
+                        <span class="fw-bold text-dark" th:text="${nombreUsuario}">Estudiante</span>
+                    </div>
+
+                    <div class="nav-item dropdown">
+                        <a class="nav-link position-relative p-2 bg-light rounded-circle d-flex align-items-center justify-content-center"
+                            style="width: 40px; height: 40px;" href="#" id="notiDropdown" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <i class="fas fa-bell text-secondary"></i>
+                            <span th:if="${notificacionesNoLeidas > 0}"
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white"
+                                style="font-size: 0.55rem; padding: 0.35em 0.5em; top: 4px !important; left: 34px !important;">
+                                <span th:text="${notificacionesNoLeidas}">0</span>
+                            </span>
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 py-2 mt-2"
+                            aria-labelledby="notiDropdown" style="width: 320px;">
+                            <li>
+                                <div class="d-flex justify-content-between align-items-center px-3 py-2">
+                                    <h6 class="dropdown-header p-0 m-0 fw-bold text-dark" style="font-size: 0.9rem;">
+                                        Notificaciones</h6>
+                                    <span th:if="${notificacionesNoLeidas > 0}" class="badge text-primary small"
+                                        style="background: #eff6ff; font-size: 0.7rem; font-weight: 700;">Nuevas</span>
+                                </div>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider opacity-50">
+                            </li>
+
+                            <div class="custom-scroll" style="max-height: 300px; overflow-y: auto;">
+                                <li th:each="n : ${notificaciones}">
+                                    <a class="dropdown-item p-3 border-bottom d-flex align-items-start gap-3"
+                                        th:href="@{/convocatorias/notificaciones/leer/{id}(id=${n.id})}">
+                                        <div class="bg-light text-primary rounded-circle d-flex align-items-center justify-content-center"
+                                            style="width: 36px; height: 36px; flex-shrink: 0;">
+                                            <i class="fas fa-bullhorn small"></i>
+                                        </div>
+                                        <div class="w-100">
+                                            <p class="mb-1 text-dark text-wrap"
+                                                style="line-height: 1.4; font-size: 0.8rem; font-weight: 500;">
+                                                <span th:text="${n.mensaje}">Título del aviso informático...</span>
+                                            </p>
+                                            <div class="d-flex align-items-center text-muted"
+                                                style="font-size: 0.7rem;">
+                                                <i class="far fa-clock me-1"></i>
+                                                <span
+                                                    th:text="${#temporals.format(n.fechaCreacion, 'dd MMM, hh:mm a')}">Hace
+                                                    unos instantes</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                            </div>
+
+                            <li th:if="${notificaciones == null or notificaciones.empty}">
+                                <div class="text-center py-4">
+                                    <i class="fas fa-bell-slash text-muted opacity-25 fa-2x mb-2"></i>
+                                    <p class="text-muted small mb-0">Sin alertas pendientes</p>
+                                </div>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item text-center small text-primary fw-bold pt-2 pb-1"
+                                    th:href="@{/convocatorias/disponibles}" style="font-size: 0.8rem;">
+                                    Ver todas las convocatorias
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="vr d-none d-md-block mx-1" style="height: 24px; color: #cbd5e1;"></div>
+
+                    <form th:action="@{/logout}" method="post" class="m-0">
+                        <button class="btn btn-outline-danger btn-logout btn-sm d-flex align-items-center gap-1">
+                            <i class="fas fa-sign-out-alt"></i> <span>Salir</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+
+        <div
+            class="hero-banner d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-5">
+            <div>
+                <h2 class="fw-800 text-dark mb-1" style="font-weight: 800; letter-spacing: -0.5px;">¡Hola de nuevo,
+                    <span class="text-primary" th:text="${nombreUsuario}">Estudiante</span>!
+                </h2>
+                <p class="text-muted mb-0">Revisa de forma centralizada el estado de tus solicitudes y nuevas vacantes.
+                </p>
+            </div>
+            <div class="d-none d-lg-block text-primary opacity-25 display-5 pe-2">
+                <i class="fas fa-grip"></i>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+
+            <div class="col-md-4">
+                <div class="action-card p-4">
+                    <div>
+                        <div class="icon-circle bg-light-primary">
+                            <i class="fas fa-bullhorn"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark text-center mb-2">Convocatorias</h5>
+                        <p class="text-muted text-center small mb-4">Descubre becas, cursos y oportunidades disponibles
+                            para ti hoy.</p>
+                    </div>
+                    <a th:href="@{/convocatorias/disponibles}" class="btn btn-primary btn-card-action shadow-sm"
+                        style="background: var(--primary-gradient); border: none;">
+                        Explorar Ofertas
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="action-card card-success p-4">
+                    <div>
+                        <div class="icon-circle bg-light-success">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark text-center mb-2">Mis Trámites</h5>
+                        <p class="text-muted text-center small mb-4">Consulta el estado y seguimiento en tiempo real de
+                            tus solicitudes.</p>
+                    </div>
+                    <a th:href="@{/convocatorias/mis-inscripciones}" class="btn btn-outline-success btn-card-action">
+                        Ver Mis Estados
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="action-card card-secondary p-4">
+                    <div>
+                        <div class="icon-circle bg-light-secondary">
+                            <i class="fas fa-user-edit"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark text-center mb-2">Mi Perfil</h5>
+                        <p class="text-muted text-center small mb-4">Actualiza tu información personal y parámetros de
+                            seguridad de acceso.</p>
+                    </div>
+                    <a th:href="@{/perfil}" class="btn btn-outline-secondary btn-card-action">
+                        Configurar Cuenta
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card table-card">
+                    <div class="card-header bg-transparent py-4 px-4 d-flex justify-content-between align-items-center">
+                        <h5 class="m-0 fw-bold text-dark d-flex align-items-center gap-2"
+                            style="letter-spacing: -0.3px;">
+                            <i class="fas fa-history text-primary"></i> Actividad Reciente
+                        </h5>
+                        <span class="badge text-dark bg-light border px-3 py-2 rounded-pill fw-semibold"
+                            th:if="${misInscripciones != null && !misInscripciones.empty}"
+                            th:text="|Inscripciones: ${misInscripciones.size()}|" style="font-size: 0.8rem;">Total:
+                            0</span>
+                    </div>
+
+                    <div class="card-body p-0">
+
+                        <div th:if="${misInscripciones == null || misInscripciones.empty}"
+                            class="text-center py-5 bg-white">
+                            <div class="mb-3 bg-light mx-auto rounded-circle d-flex align-items-center justify-content-center"
+                                style="width: 72px; height: 72px;">
+                                <i class="fas fa-folder-open text-muted opacity-50 fs-4"></i>
+                            </div>
+                            <h6 class="text-dark fw-bold mb-1">No registras inscripciones activas</h6>
+                            <p class="text-muted small mb-3">Postúlate a programas académicos para ver tu historial
+                                aquí.</p>
+                            <a th:href="@{/convocatorias/disponibles}" class="btn btn-primary btn-sm rounded-pill px-4"
+                                style="background: var(--primary-gradient); border:none;">Aplicar a una vacante</a>
+                        </div>
+
+                        <div class="table-responsive" th:if="${misInscripciones != null && !misInscripciones.empty}">
+                            <table class="table align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-4">Detalle Convocatoria</th>
+                                        <th>Fecha Registro</th>
+                                        <th>Estado Actual</th>
+                                        <th class="text-end pe-4">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="ins : ${misInscripciones}">
+                                        <td class="ps-4">
+                                            <div class="fw-bold text-dark mb-1" th:text="${ins.convocatoria.titulo}">
+                                                Título de Oportunidad</div>
+                                            <div class="text-muted d-flex align-items-center gap-1"
+                                                style="font-size: 0.75rem;">
+                                                <span class="bg-light px-2 py-1 rounded text-secondary fw-semibold">ID
+                                                    #<span th:text="${ins.id}">000</span></span>
+                                            </div>
+                                        </td>
+                                        <td class="text-secondary fw-medium">
+                                            <i class="far fa-calendar-alt text-muted me-2"></i>
+                                            <span th:text="${#temporals.format(ins.fechaInscripcion, 'dd MMM yyyy')}">23
+                                                May 2026</span>
+                                        </td>
+                                        <td>
+                                            <div th:switch="${ins.estado}">
+                                                <span th:case="'ACEPTADO'" class="badge badge-soft-success">
+                                                    <i class="fas fa-check-circle me-1"></i> Aceptado
+                                                </span>
+                                                <span th:case="'RECHAZADO'" class="badge badge-soft-danger">
+                                                    <i class="fas fa-times-circle me-1"></i> Rechazado
+                                                </span>
+                                                <span th:case="*" class="badge badge-soft-warning">
+                                                    <i class="fas fa-clock me-1"></i> Pendiente
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <a th:href="@{/convocatorias/comprobante/{id}(id=${ins.id})}"
+                                                class="btn btn-pdf-icon" title="Descargar Comprobante PDF"
+                                                data-bs-toggle="tooltip">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="text-center text-muted mt-5 mb-2">
+            <small>&copy; 2026 Compuedu Plataforma. Todos los derechos reservados.</small>
+        </footer>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Inicialización del motor de Tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+
+</body>
+
+</html>

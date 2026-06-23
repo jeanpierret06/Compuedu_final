@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Convocatorias Disponibles - Compuedu</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Fuentes y Frameworks -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            --accent-gradient: linear-gradient(135deg, #10b981 0%, #047857 100%);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+            --card-hover-shadow: 0 20px 40px -5px rgba(59, 130, 246, 0.15);
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #f4f7fa; 
+            color: #1e293b; 
+        }
+
+        /* Navbar Minimalista */
+        .navbar { 
+            background: rgba(255, 255, 255, 0.9); 
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8); 
+        }
+        
+        /* Hero Section Integrada */
+        .hero-banner {
+            background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.08) 0%, rgba(244, 247, 250, 1) 70%);
+            padding: 3.5rem 0 2rem 0;
+            border-radius: 0 0 40px 40px;
+        }
+
+        /* Contenedores Estilo Premium (Glassmorphism sutil) */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: var(--card-shadow);
+        }
+
+        /* Buscador unificado estilo cápsula */
+        .search-pill {
+            background: white;
+            border-radius: 50px;
+            padding: 0.4rem;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s;
+        }
+        .search-pill:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
+
+        /* Tarjetas de Convocatoria Evolucionadas */
+        .card-convocatoria {
+            border: none;
+            border-radius: 24px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            position: relative;
+        }
+        .card-convocatoria:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--card-hover-shadow);
+        }
+        
+        /* Contenedores de Imágenes */
+        .card-img-wrapper {
+            position: relative;
+            height: 160px;
+            overflow: hidden;
+            background: #e2e8f0;
+        }
+        .card-img-top-cover {
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .card-convocatoria:hover .card-img-top-cover {
+            transform: scale(1.06);
+        }
+
+        /* Placeholder Dinámico Inteligente */
+        .card-header-placeholder {
+            height: 100%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3.5rem;
+        }
+        .card-header-placeholder i { opacity: 0.35; }
+
+        /* Badges Flotantes Premium */
+        .category-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 2;
+            padding: 0.5rem 1rem;
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .badge-beca { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+        .badge-curso { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+        .badge-pasantia { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+        .badge-default { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+        .status-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 2;
+            backdrop-filter: blur(8px);
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            font-weight: 700;
+            font-size: 0.75rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+        }
+
+        /* Cuerpo y Detalles */
+        .card-body { flex: 1; padding: 1.5rem; display: flex; flex-direction: column; }
+        .card-title { font-size: 1.15rem; font-weight: 700; color: #0f172a; line-height: 1.4; min-height: 52px; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-text { color: #64748b; font-size: 0.9rem; line-height: 1.5; flex-grow: 1; }
+        
+        /* Línea de Tiempos Exclusiva */
+        .date-timeline {
+            background-color: #f8fafc;
+            border-radius: 16px;
+            padding: 0.85rem;
+            border: 1px solid #f1f5f9;
+        }
+        .date-item { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; font-weight: 500; }
+        .date-item i { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; }
+        .date-start i { background: #e0f2fe; color: #0284c7; }
+        .date-end i { background: #fee2e2; color: #ef4444; }
+        
+        /* Botonera de Acción */
+        .btn-ver-detalle {
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: 14px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            width: 100%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-ver-detalle:hover { 
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            color: white; 
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+            transform: translateY(-1px);
+        }
+        
+        .btn-inscrito {
+            background-color: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+            border-radius: 14px;
+            width: 100%;
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg sticky-top py-3">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="#">
+            <div class="bg-primary text-white p-2 rounded-3 me-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: var(--primary-gradient) !important;">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <span style="letter-spacing: -0.5px;">Compuedu <span class="text-primary">Portal</span></span>
+        </a>
+        <a th:href="@{/dashboard}" class="btn btn-light btn-sm rounded-pill px-4 border">
+            <i class="fas fa-arrow-left me-2 text-muted"></i>Volver al Inicio
+        </a>
+    </div>
+</nav>
+
+<!-- Hero Head Section -->
+<div class="hero-banner text-center">
+    <div class="container">
+        <h1 class="fw-800 text-dark display-5 mb-2" style="font-weight: 800; letter-spacing: -1px;">Oportunidades Disponibles</h1>
+        <p class="text-muted mx-auto" style="max-width: 600px; font-size: 1.1rem;">Explora becas, pasantías y cursos abiertos diseñados para impulsar exponencialmente tu futuro profesional.</p>
+    </div>
+</div>
+
+<div class="container pb-5 mt-4">
+
+    <!-- Panel de Alertas por Correo Inteligente -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-xl-10">
+            <div class="glass-panel p-4">
+                <form th:action="@{/estudiante/guardar-alerta}" method="post">
+                    <h6 class="fw-bold text-dark mb-3"><i class="fas fa-bolt text-warning me-2"></i>¿No encuentras lo que buscas? Activa una alerta</h6>
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-5">
+                            <div class="input-group search-pill">
+                                <span class="input-group-text bg-transparent border-0 pe-2"><i class="fas fa-search text-muted"></i></span>
+                                <input type="text" name="palabraClave" class="form-control border-0 bg-transparent py-2" 
+                                       placeholder="Área de interés (ej: Python, Diseño)" required>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="input-group search-pill">
+                                <span class="input-group-text bg-transparent border-0 pe-2"><i class="fas fa-tags text-muted"></i></span>
+                                <select name="categoria" class="form-select border-0 bg-transparent py-2">
+                                    <option value="Beca">Beca Académica</option>
+                                    <option value="Curso">Curso Práctico</option>
+                                    <option value="Pasantía">Pasantía Profesional</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-dark w-100 fw-bold py-2.5 rounded-pill" style="height: 48px; border-radius: 50px;">
+                                <i class="fas fa-bell me-2"></i>Notificarme
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertas Flash -->
+    <div th:if="${param.alertaGuardada}" class="row justify-content-center mb-4">
+        <div class="col-xl-10">
+            <div class="alert alert-success alert-dismissible fade show border-0 rounded-4 shadow-sm p-3 bg-white d-flex align-items-center" role="alert">
+                <div class="bg-success text-white rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width:32px; height:32px;">
+                    <i class="fas fa-check small"></i>
+                </div>
+                <div>
+                    <strong>¡Suscripción activa!</strong> Te enviaremos un correo apenas abramos nuevas vacantes de este tipo.
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="top: 13px;"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barra de Búsqueda de Contenidos Principal -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-8 col-lg-7">
+            <form th:action="@{/convocatorias/oportunidades}" method="get">
+                <div class="input-group shadow-sm rounded-pill overflow-hidden bg-white p-1.5 border" style="border: 1px solid #e2e8f0 !important;">
+                    <span class="input-group-text border-0 bg-white ps-4">
+                        <i class="fas fa-search text-muted"></i>
+                    </span>
+                    <input type="text" name="keyword" th:value="${keyword}" 
+                           class="form-control border-0 py-2.5 fs-6" 
+                           placeholder="Buscar por palabras clave en títulos...">
+                    <button class="btn btn-primary px-4 fw-bold rounded-pill" style="background: var(--primary-gradient);" type="submit">Buscar ahora</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Vista Vacía Con Estilo Emocional -->
+    <div th:if="${convocatorias.empty}" class="text-center py-5">
+        <div class="mb-4 bg-white shadow-sm mx-auto rounded-circle d-flex align-items-center justify-content-center" style="width: 100px; height: 100px; border: 1px solid #e2e8f0;">
+            <i class="fas fa-mailbox fa-2x text-muted opacity-50"></i>
+        </div>
+        <h4 class="text-dark fw-bold mb-1">Sin resultados por el momento</h4>
+        <p class="text-muted small">Prueba modificando los términos de tu buscador o creando una alerta de correo.</p>
+    </div>
+
+    <!-- Grid Dinámico de Convocatorias -->
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-4" th:each="conv : ${convocatorias}">
+            <div class="card card-convocatoria">
+                
+                <!-- Identificadores y Badges Flotantes Condicionales -->
+                <span class="status-badge" th:if="${conv.activa}">
+                    <i class="fas fa-circle fa-xs me-1 text-success"></i> Abierta
+                </span>
+
+                <!-- Badge Inteligente de Categoría -->
+                <th:block th:switch="${conv.categoria}">
+                    <span th:case="'Beca'" class="category-badge badge-beca">Beca</span>
+                    <span th:case="'Curso'" class="category-badge badge-curso">Curso</span>
+                    <span th:case="'Pasantía'" class="category-badge badge-pasantia">Pasantía</span>
+                    <span th:case="*" class="category-badge badge-default" th:text="${conv.categoria}">Otros</span>
+                </th:block>
+
+                <!-- Wrapper Multimedia -->
+                <div class="card-img-wrapper">
+                    <!-- Si posee imagen subida -->
+                    <div th:if="${conv.imagenUrl != null and !conv.imagenUrl.isEmpty()}" class="h-100">
+                        <img th:src="${conv.imagenUrl}" class="card-img-top-cover" alt="Banner Oportunidad">
+                    </div>
+                    
+                    <!-- Respaldo Dinámico (Placeholder por Categoría) -->
+                    <div th:if="${conv.imagenUrl == null or conv.imagenUrl.isEmpty()}" class="card-header-placeholder">
+                        <th:block th:switch="${conv.categoria}">
+                            <i th:case="'Beca'" class="fas fa-graduation-cap"></i>
+                            <i th:case="'Curso'" class="fas fa-book-open"></i>
+                            <i th:case="'Pasantía'" class="fas fa-building-user"></i>
+                            <i th:case="*" class="fas fa-star"></i>
+                        </th:block>
+                    </div>
+                </div>
+
+                <!-- Contenido -->
+                <div class="card-body">
+                    <h5 class="card-title mb-2" th:text="${conv.titulo}">Título de la Vacante</h5>
+                    
+                    <p class="card-text small mb-4" th:text="${conv.descripcion}">
+                        Breve resumen informativo de la postulación académica o laboral del alumno...
+                    </p>
+
+                    <!-- Fechas y Línea de Tiempo Estilizada -->
+                    <div class="date-timeline mt-auto">
+                        <div class="date-item date-start mb-2 text-muted">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Apertura: <strong class="text-dark" th:text="${#temporals.format(conv.fechaInicio, 'dd/MM/yyyy')}">01/01/2026</strong></span>
+                        </div>
+                        <div class="date-item date-end text-muted">
+                            <i class="fas fa-hourglass-end"></i>
+                            <span>Postulación hasta: <strong class="text-danger" th:text="${#temporals.format(conv.fechaFin, 'dd/MM/yyyy')}">30/01/2026</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Adaptativo de Interacción -->
+                <div class="card-footer bg-white border-0 p-4 pt-0">
+                    <!-- Flujo 1: Estudiante Postulado -->
+                    <div th:if="${inscripcionesIds != null and inscripcionesIds.contains(conv.id)}">
+                        <div class="btn-inscrito">
+                            <i class="fas fa-circle-check"></i> Postulación enviada
+                        </div>
+                    </div>
+
+                    <!-- Flujo 2: Disponible para aplicar -->
+                    <div th:unless="${inscripcionesIds != null and inscripcionesIds.contains(conv.id)}">
+                        <a th:href="@{/convocatorias/detalle/{id}(id=${conv.id})}" class="btn btn-ver-detalle">
+                            Ver convocatoria <i class="fas fa-arrow-right ms-1 small"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Usuarios</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f6f9;
+        }
+        
+        /* Navbar (Consistente con el Dashboard) */
+        .navbar { background: white; border-bottom: 1px solid #eef2f6; }
+        .navbar-brand { font-weight: 600; color: #2c3e50 !important; }
+
+        /* Estilos de Tarjetas */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+        
+        /* Filtros */
+        .filter-card {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .form-label {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .input-group-text { background-color: #f8f9fa; border: 1px solid #dee2e6; color: #6c757d; }
+        .form-control:focus, .form-select:focus {
+            box-shadow: none;
+            border-color: #4e73df;
+        }
+
+        /* Tabla */
+        .table thead th {
+            background-color: #f8f9fc;
+            color: #4e73df;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            border-bottom: 2px solid #e3e6f0;
+            padding: 1rem;
+        }
+        .table td {
+            vertical-align: middle;
+            color: #5a5c69;
+            padding: 1rem;
+        }
+        .table-hover tbody tr:hover { background-color: #f8f9fc; }
+
+        /* Avatares y Badges */
+        .avatar-circle {
+            width: 38px; height: 38px;
+            background-color: #eaecf4;
+            color: #4e73df;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold;
+        }
+        .badge-rol { padding: 0.5em 0.8em; border-radius: 50rem; font-size: 0.75rem; font-weight: 600; }
+        .bg-rol-admin { background-color: #e74a3b; color: white; } /* Rojo */
+        .bg-rol-user { background-color: #36b9cc; color: white; } /* Cyan */
+
+        /* Botones de Acción */
+        .btn-icon {
+            width: 32px; height: 32px;
+            padding: 0;
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s;
+            border: 1px solid #e3e6f0;
+            background: white;
+            color: #555;
+        }
+        .btn-icon:hover { transform: translateY(-2px); border-color: transparent; color: white; }
+        .btn-edit:hover { background-color: #f6c23e; } /* Amarillo */
+        .btn-delete:hover { background-color: #e74a3b; } /* Rojo */
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg sticky-top mb-4 py-3 shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="fas fa-cogs text-primary fs-4 me-2"></i>
+                <span>Panel<span class="text-primary">Admin</span></span>
+            </a>
+            <div class="d-flex align-items-center">
+                <a th:href="@{/dashboard}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 me-2">
+                    <i class="fas fa-arrow-left me-1"></i> Volver
+                </a>
+                <form th:action="@{/logout}" method="post">
+                    <button class="btn btn-danger btn-sm rounded-pill px-3">
+                        <i class="fas fa-power-off"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-dark mb-1">Gestión de Usuarios</h2>
+                <p class="text-muted mb-0">Administra el acceso y roles de la plataforma.</p>
+            </div>
+            <a th:href="@{/usuarios/nuevo}" class="btn btn-primary shadow-sm rounded-pill px-4 py-2 fw-bold">
+                <i class="fas fa-plus me-2"></i> Nuevo Usuario
+            </a>
+        </div>
+
+    <div class="card filter-card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+            <form method="get" th:action="@{/usuarios}"> 
+                <div class="row g-3 align-items-end">
+                    
+                    <div class="col-md-5">
+                        <label for="keyword" class="form-label small fw-bold text-muted">BUSCAR USUARIO</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                            <input type="text" name="keyword" id="keyword" class="form-control border-start-0" 
+                                placeholder="Nombre, Email o Documento..." th:value="${keyword}">
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="rol" class="form-label small fw-bold text-muted">FILTRAR POR ROL</label>
+                        <select class="form-select" name="rol" id="rol">
+                            <option value="Todos" th:selected="${rol == 'Todos'}">Todos los roles</option>
+                            <option value="ADMIN" th:selected="${rol == 'ADMIN'}">Administradores</option>
+                            <option value="USER" th:selected="${rol == 'USER'}">Usuarios</option>
+                            <option value="INSTITUCION" th:selected="${rol == 'INSTITUCION'}">Instituciones</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary w-100 fw-bold rounded-pill">
+                            <i class="fas fa-filter me-2"></i>Filtrar
+                        </button>
+                        <a th:href="@{/usuarios}" class="btn btn-outline-secondary rounded-circle" title="Limpiar Filtros">
+                            <i class="fas fa-sync-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-users me-2"></i>Lista de Usuarios
+                </h5>
+                
+                <a th:href="@{/usuarios/exportarPDF(keyword=${keyword})}" 
+                    class="btn btn-danger">
+                    <i class="fas fa-file-pdf"></i> Exportar PDF de la vista actual
+                </a>
+            </div>
+            
+            <div class="card-body p-0">
+                <div th:if="${usuarios.empty}" class="text-center py-5">
+                    <i class="fas fa-user-slash fa-3x text-muted mb-3 opacity-50"></i>
+                    <p class="text-muted fw-medium">No se encontraron usuarios.</p>
+                </div>
+
+                <div class="table-responsive" th:if="${!usuarios.empty}">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Usuario</th>
+                                <th>Contacto</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                                <th class="text-center pe-4" style="width: 150px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="u : ${usuarios}">
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle me-3">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div>
+                                <!-- Mostramos Nombre y Apellido como principal -->
+                                                <div class="fw-bold text-dark" th:text="${u.nombre + ' ' + u.apellido}">Nombre Real</div>
+                                                <!-- El username queda como un identificador pequeño -->
+                                                <small class="text-muted" style="font-size: 0.75rem;">
+                                                    @<span th:text="${u.userName}">username</span> 
+                                                    <span class="mx-1">|</span> 
+                                                    ID: #<span th:text="${u.id}">1</span>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="small text-dark mb-1">
+                                            <i class="fas fa-envelope text-muted me-2"></i>
+                                            <span th:text="${u.email != null ? u.email : '-'}">email</span>
+                                        </span>
+                                        <span class="small text-muted">
+                                            <i class="fas fa-id-card text-muted me-2"></i>
+                                            <span th:text="${u.documento != null ? u.documento : '-'}">documento</span>
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="badge badge-rol" 
+                                        th:classappend="${u.rol == 'ADMIN' ? 'bg-rol-admin' : 'bg-rol-user'}"
+                                        th:text="${u.rol}">
+                                        ROL
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span th:if="${u.habilitado}" class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill">
+                                        <i class="fas fa-check-circle me-1"></i> Activo
+                                    </span>
+                                    <span th:unless="${u.habilitado}" class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill">
+                                        <i class="fas fa-ban me-1"></i> Inactivo
+                                    </span>
+                                </td>
+
+                                <td class="text-center pe-4">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <!-- Botón Editar (Siempre visible) -->
+                                        <a th:href="@{'/usuarios/editar/' + ${u.id}}" 
+                                        class="btn-icon btn-edit" 
+                                        title="Editar Usuario" data-bs-toggle="tooltip">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+                                        
+                                        <!-- MOSTRAR CANDADO SI ES EL USUARIO EN SESIÓN (No se puede suicidar) -->
+                                        <div th:if="${u.userName == #authentication.name}" 
+                                            class="btn-icon border-0" 
+                                            style="background: transparent;"
+                                            title="Tu propia cuenta (Sesión Activa)" data-bs-toggle="tooltip">
+                                            <i class="fas fa-lock text-muted opacity-50"></i>
+                                        </div>
+
+                                        <!-- MOSTRAR BOTÓN DE ESTADO SOLO SI NO ES EL USUARIO EN SESIÓN -->
+                                        <form th:if="${u.userName != #authentication.name}" 
+                                            th:action="@{'/usuarios/estado/' + ${u.id}}" method="post" style="display:inline;">
+                                            <button type="submit" 
+                                                    class="btn-icon" 
+                                                    th:classappend="${u.habilitado ? 'btn-delete text-danger' : 'btn-success text-white bg-success'}"
+                                                    th:title="${u.habilitado ? 'Inhabilitar Usuario' : 'Habilitar Usuario'}" 
+                                                    data-bs-toggle="tooltip"
+                                                    th:onclick="return confirm([[${u.habilitado}]] ? '¿Inhabilitar acceso a este usuario?' : '¿Habilitar acceso de nuevo?');">
+                                                <i th:class="${u.habilitado ? 'fas fa-user-slash' : 'fas fa-user-check'}"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="card-footer bg-white py-3 border-0">
+                <small class="text-muted" th:if="${!usuarios.empty}">
+                    Total: <strong th:text="${usuarios.size()}">0</strong> usuarios registrados.
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Inicializar tooltips de Bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+</body>
+</html>

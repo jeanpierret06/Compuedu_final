@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mis Convocatorias</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- LÓGICA DE MAPAS: Estilos y Scripts de Leaflet API -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f4f6f9; }
+        .navbar { background: white; border-bottom: 1px solid #eef2f6; }
+        
+        /* Tarjeta de Convocatoria */
+        .card-convocatoria {
+            border: none;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            transition: all 0.2s;
+            overflow: hidden;
+            border-left: 5px solid #4e73df;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-convocatoria:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .card-body { flex: 1; }
+
+        /* Imagen de vista previa en tarjeta */
+        .card-img-thumb {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-bottom: 1px solid #eef2f6;
+        }
+        .card-img-placeholder {
+            width: 100%;
+            height: 140px;
+            background: linear-gradient(135deg, #f6f8fa 0%, #e9ecef 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #adb5bd;
+            border-bottom: 1px solid #eef2f6;
+        }
+
+        /* Imagen en Modal */
+        .modal-banner-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        /* Badges */
+        .badge-status { font-size: 0.75rem; padding: 0.4em 0.8em; border-radius: 50px; font-weight: 600; }
+        .bg-active { background-color: rgba(28, 200, 138, 0.1); color: #1cc88a; }
+        .bg-inactive { background-color: rgba(231, 74, 59, 0.1); color: #e74a3b; }
+        
+        .btn-create {
+            background: linear-gradient(135deg, #4e73df, #224abe);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3);
+        }
+        .btn-create:hover { background: #2e59d9; color: white; transform: translateY(-2px); }
+
+        /* Modal Styles */
+        .modal-header { background-color: #f8f9fa; border-bottom: 1px solid #eef2f6; }
+        .modal-title { font-weight: 700; color: #2c3e50; }
+        .info-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #858796; margin-bottom: 0.2rem; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg sticky-top mb-4 py-3 shadow-sm bg-white">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-dark" href="#">
+            <i class="fas fa-university text-primary me-2"></i>Portal<span class="text-primary">Aliados</span>
+        </a>
+        <div class="d-flex align-items-center">
+            <a th:href="@{/dashboard}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 me-3">
+                <i class="fas fa-arrow-left me-1"></i> Volver al Panel
+            </a>
+            <span class="me-3 text-muted d-none d-md-block">
+                Hola, <b th:text="${nombreUsuario}">Institución</b>
+            </span>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Mis Convocatorias</h2>
+            <p class="text-muted mb-0">Gestiona las ofertas académicas que has publicado.</p>
+        </div>
+        <a th:href="@{/convocatorias/nueva}" class="btn btn-create rounded-pill px-4 py-2 fw-bold">
+            <i class="fas fa-plus me-2"></i> Nueva Convocatoria
+        </a>
+    </div>
+
+    <div th:if="${convocatorias.empty}" class="text-center py-5">
+        <div class="mb-3 text-muted opacity-25">
+            <i class="fas fa-file-invoice fa-4x"></i>
+        </div>
+        <h5 class="fw-bold text-secondary">Aún no has publicado nada</h5>
+        <p class="text-muted small">Crea tu primera convocatoria para empezar a recibir estudiantes.</p>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6 col-lg-4" th:each="conv : ${convocatorias}">
+            <div class="card card-convocatoria">
+                
+                <!-- MINIATURA MULTIMEDIA DINÁMICA -->
+                <div th:if="${conv.imagenUrl != null and !conv.imagenUrl.isEmpty()}">
+                    <img th:src="${conv.imagenUrl}" class="card-img-thumb" alt="Miniatura">
+                </div>
+                <div th:if="${conv.imagenUrl == null or conv.imagenUrl.isEmpty()}" class="card-img-placeholder">
+                    <i class="fas fa-image fa-2x"></i>
+                </div>
+
+                <div class="card-body p-3">
+                    <div class="mb-2">
+                        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill small" 
+                            th:text="${conv.categoria}">Beca</span>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-2" th:text="${conv.titulo}">Beca Excelencia</h5>
+                    <p class="text-muted small mb-3 text-truncate" th:text="${conv.descripcion}">
+                        Descripción corta de la convocatoria...
+                    </p>
+                    
+                    <div class="small text-secondary mb-3">
+                        <i class="far fa-calendar-alt me-1 text-primary"></i>
+                        <span th:text="${#temporals.format(conv.fechaInicio, 'dd MMM')}">01 Ene</span> - 
+                        <span th:text="${#temporals.format(conv.fechaFin, 'dd MMM yyyy')}">30 Ene 2025</span>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <p class="info-label">Cupos totales asignados</p>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-users text-primary me-2"></i>
+                                <span class="text-dark fw-bold" th:text="${conv.vacantes + ' vacantes'}">25 vacantes</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-1">
+                        <span th:if="${conv.estado == 'ACTIVA'}" class="badge-status bg-active">
+                            <i class="fas fa-check-circle me-1"></i> Publicada
+                        </span>
+                        <span th:if="${conv.estado == 'INACTIVA'}" class="badge-status bg-warning bg-opacity-10 text-warning">
+                            <i class="fas fa-eye-slash me-1"></i> Pausada por ti
+                        </span>
+                        <span th:if="${conv.estado == 'ANULADA'}" class="badge-status bg-inactive">
+                            <i class="fas fa-ban me-1"></i> Anulada por Admin
+                        </span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center p-3 pt-2 border-top bg-light bg-opacity-50">
+                    <form th:action="@{/institucion/convocatorias/toggle/{id}(id=${conv.id})}" method="post">
+                        <button type="submit" 
+                                th:class="${conv.estado == 'ACTIVA' ? 'btn btn-link text-danger p-0 text-decoration-none' : 'btn btn-link text-success p-0 text-decoration-none'}"
+                                th:if="${conv.estado != 'ANULADA'}">
+                            <i th:class="${conv.estado == 'ACTIVA' ? 'fas fa-toggle-on fa-lg' : 'fas fa-toggle-off fa-lg'}"></i>
+                            <small class="fw-bold" th:text="${conv.estado == 'ACTIVA' ? ' Desactivar' : ' Activar'}"></small>
+                        </button>
+                        <span th:if="${conv.estado == 'ANULADA'}" class="text-muted small italic">Bloqueada</span>
+                    </form>
+
+                    <!-- Botón Detalles: Pasa data-attributes para inicializar el mapa al hacer clic -->
+                    <button class="btn btn-light btn-sm text-secondary border rounded-pill btn-modal-trigger" 
+                            data-bs-toggle="modal" 
+                            th:data-bs-target="'#modalDetalle' + ${conv.id}"
+                            th:data-id="${conv.id}"
+                            th:data-lat="${conv.latitud}"
+                            th:data-lng="${conv.longitud}">
+                        <i class="fas fa-eye me-1"></i> Detalles
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- MODAL DETALLE DE LA CONVOCATORIA -->
+            <div class="modal fade modal-convocatoria" th:id="'modalDetalle' + ${conv.id}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" th:text="${conv.titulo}">Título Completo</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            
+                            <!-- Banner en Modal -->
+                            <div class="mb-3" th:if="${conv.imagenUrl != null and !conv.imagenUrl.isEmpty()}">
+                                <img th:src="${conv.imagenUrl}" class="modal-banner-img" alt="Banner">
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-7">
+                                    <div class="mb-3">
+                                        <p class="info-label">Descripción Completa</p>
+                                        <p class="text-secondary small" style="white-space: pre-line;" th:text="${conv.descripcion}">
+                                            Descripción de la convocatoria...
+                                        </p>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <p class="info-label">Fecha Inicio</p>
+                                            <p class="text-dark fw-bold small" th:text="${#temporals.format(conv.fechaInicio, 'dd MMMM yyyy')}"></p>
+                                        </div>
+                                        <div class="col-6">
+                                            <p class="info-label">Fecha Fin</p>
+                                            <p class="text-dark fw-bold small" th:text="${#temporals.format(conv.fechaFin, 'dd MMMM yyyy')}"></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-5 border-start-md">
+                                    <!-- MAPA INTERACTIVO EN EL MODAL -->
+                                    <div class="mb-3">
+                                        <p class="info-label"><i class="fas fa-map-marker-alt text-primary me-1"></i>Sede Registrada</p>
+                                        
+                                        <!-- Contenedor del mapa condicional si tiene coordenadas -->
+                                        <div th:if="${conv.latitud != null and conv.longitud != null}">
+                                            <div th:id="'mapa-modal-' + ${conv.id}" class="rounded shadow-sm" style="height: 180px; border: 1px solid #cbd5e1;"></div>
+                                        </div>
+                                        <div th:if="${conv.latitud == null or conv.longitud == null}" class="p-3 bg-light rounded text-center text-muted small">
+                                            <i class="fas fa-map-marked mb-1 d-block"></i> No se configuró una sede física para esta convocatoria.
+                                        </div>
+                                    </div>
+
+                                    <div class="p-3 bg-light rounded-3 border">
+                                        <p class="info-label mb-1">Estado de Visibilidad</p>
+                                        <div th:if="${conv.estado == 'ACTIVA'}" class="text-success fw-bold small">
+                                            <i class="fas fa-check-circle me-1"></i> Visible para estudiantes
+                                        </div>
+                                        <div th:if="${conv.estado == 'INACTIVA'}" class="text-secondary fw-bold small">
+                                            <i class="fas fa-eye-slash me-1"></i> Oculta (Pausada)
+                                        </div>
+                                        <div th:if="${conv.estado == 'ANULADA'}" class="text-danger fw-bold small">
+                                            <i class="fas fa-ban me-1"></i> Oculta (Bloqueada por Admin)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="modal-footer border-0 bg-light bg-opacity-50">
+                            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- FIN MODAL -->
+
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- LÓGICA DE CONTROL DE MAPAS EN MODALES ASÍNCRONOS -->
+<script>
+    // Objeto global para almacenar las instancias de mapas abiertos y evitar duplicados en memoria
+    const mapasInstancias = {};
+
+    // Escuchar el evento de Bootstrap cuando un modal termina de abrirse por completo
+    const modalesLista = document.querySelectorAll('.modal-convocatoria');
+    
+    modalesLista.forEach(modalElement => {
+        modalElement.addEventListener('shown.bs.modal', function (event) {
+            // Obtener el botón que activó este modal específico
+            const boton = document.querySelector(`[data-bs-target="#${this.id}"]`);
+            if (!boton) return;
+
+            const id = boton.getAttribute('data-id');
+            const lat = parseFloat(boton.getAttribute('data-lat'));
+            const lng = parseFloat(boton.getAttribute('data-lng'));
+
+            // Si la convocatoria no tiene coordenadas válidas, salimos de la función
+            if (isNaN(lat) || isNaN(lng)) return;
+
+            const contenedorId = `mapa-modal-${id}`;
+            const contenedorElemento = document.getElementById(contenedorId);
+
+            if (contenedorElemento) {
+                // Si el mapa ya fue creado antes, reajustamos el tamaño del mapa en pantalla y salimos
+                if (mapasInstancias[id]) {
+                    mapasInstancias[id].invalidateSize();
+                    return;
+                }
+
+                // 1. Inicializar mapa Leaflet centrado en la sede guardada
+                const mapa = L.map(contenedorId).setView([lat, lng], 14);
+
+                // 2. Cargar texturas de OpenStreetMap
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap'
+                }).addTo(mapa);
+
+                // 3. Agregar marcador estático en la sede
+                L.marker([lat, lng]).addTo(mapa)
+                    .bindPopup("<b>Ubicación de tu Sede</b>")
+                    .openPopup();
+
+                // Guardar la instancia en memoria
+                mapasInstancias[id] = mapa;
+                
+                // Forzar el redibujado correcto de Leaflet dentro de contenedores dinámicos
+                setTimeout(() => {
+                    mapa.invalidateSize();
+                }, 100);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

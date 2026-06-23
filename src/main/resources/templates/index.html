@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Portal Académico - Futuro</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Paleta de Colores Base */
+            --primary: #6366f1;
+            --accent: #06b6d4;
+            --dark-base: #0f172a;
+
+            /* Variables de Modo Claro (Default) */
+            --bg-body: #fcfcfd;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --navbar-bg: rgba(255, 255, 255, 0.8);
+            --border-color: #f1f5f9;
+            --glass: rgba(255, 255, 255, 0.8);
+        }
+
+        [data-theme="dark"] {
+            /* Variables de Modo Oscuro */
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --navbar-bg: rgba(15, 23, 42, 0.9);
+            --border-color: #334155;
+            --glass: rgba(15, 23, 42, 0.8);
+        }
+
+        /* ==========================================================================
+       NUEVO PRELOADER ESTILIZADO CON BARRA DE PROGRESO Y ANIMACIONES NICE
+       ========================================================================== */
+        .preloader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #0f172a;
+            /* Fondo oscuro cinemático */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            transition: opacity 0.8s cubic-bezier(0.77, 0, 0.175, 1),
+                visibility 0.8s cubic-bezier(0.77, 0, 0.175, 1),
+                transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        /* Desvanecimiento y desplazamiento hacia arriba al terminar */
+        .preloader-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-50px);
+        }
+
+        .preloader-brand {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Animación de entrada suave para el logo */
+        .preloader-brand img {
+            animation: fadeInLogo 1s cubic-bezier(0.215, 0.610, 0.355, 1) forwards;
+            opacity: 0;
+        }
+
+        /* Animación de entrada con retraso para el texto de la marca */
+        .preloader-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: #ffffff;
+            margin-top: 15px;
+            opacity: 0;
+            animation: fadeInText 1s cubic-bezier(0.215, 0.610, 0.355, 1) 0.3s forwards;
+        }
+
+        /* Contenedor de la barra de progreso */
+        .preloader-progress-container {
+            width: 240px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            margin-top: 35px;
+            overflow: hidden;
+            position: relative;
+            opacity: 0;
+            animation: fadeInText 0.8s ease 0.5s forwards;
+        }
+
+        /* Relleno activo de la barra con animación de carga y brillo neón */
+        .preloader-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 10px;
+            box-shadow: 0 0 12px var(--primary), 0 0 4px var(--accent);
+            animation: fillProgressBar 2s cubic-bezier(0.1, 0.8, 0.1, 1) forwards;
+        }
+
+        /* KEYFRAMES DE LAS ANIMACIONES */
+        @keyframes fadeInLogo {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes fadeInText {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fillProgressBar {
+            0% {
+                width: 0%;
+            }
+
+            25% {
+                width: 30%;
+            }
+
+            50% {
+                width: 55%;
+            }
+
+            75% {
+                width: 85%;
+            }
+
+            100% {
+                width: 100%;
+            }
+        }
+
+        body.loading {
+            overflow: hidden !important;
+        }
+
+        /* ==========================================================================
+       ESTILOS EXISTENTES DE LA PÁGINA
+       ========================================================================== */
+        [data-theme="dark"] .feature-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="dark"] .nav-link,
+        [data-theme="dark"] .navbar-brand span {
+            color: var(--text-main) !important;
+        }
+
+        [data-theme="dark"] .text-muted,
+        [data-theme="dark"] .text-secondary,
+        [data-theme="dark"] p {
+            color: var(--text-muted) !important;
+        }
+
+        [data-theme="dark"] h1,
+        [data-theme="dark"] h2,
+        [data-theme="dark"] h4,
+        [data-theme="dark"] h5 {
+            color: var(--text-main);
+        }
+
+        [data-theme="dark"] .bg-light {
+            background-color: var(--bg-body) !important;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            margin: 20px auto;
+            width: 90%;
+            border-radius: 50px;
+            background: var(--navbar-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: var(--glass);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.95);
+        }
+
+        .nav-link {
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .hero-section {
+            min-height: 85vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .carousel-item {
+            padding-top: 100px;
+            padding-bottom: 100px;
+        }
+
+        .carousel-item h1 {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .carousel-item p {
+            animation: fadeInUp 1.2s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .carousel-indicators [button] {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            margin: 0 5px;
+        }
+
+        .hero-carousel-container {
+            height: 85vh;
+            width: 100%;
+            position: relative;
+        }
+
+        .carousel-inner,
+        .carousel-item {
+            height: 100%;
+        }
+
+        .carousel-item {
+            background-size: cover !important;
+            background-position: center center !important;
+            background-repeat: no-repeat !important;
+            background-color: #0f172a;
+        }
+
+        .hero-title {
+            font-size: 4.8rem;
+            font-weight: 900;
+            color: #ffffff !important;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        [data-theme="dark"] .hero-title {
+            text-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .hero-lead {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-size: 1.25rem;
+            max-width: 600px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .carousel-indicators [button] {
+            width: 40px;
+            height: 6px;
+            border-radius: 3px;
+            background-color: var(--primary);
+        }
+
+        .hero-title {
+            font-size: 4.5rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 1;
+            color: var(--text-main);
+        }
+
+        .stats-section {
+            padding: 6rem 0;
+            margin-top: -100px;
+            position: relative;
+            z-index: 5;
+            background: transparent;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 40px;
+            padding: 3rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 30px 80px rgba(99, 102, 241, 0.15);
+            border-color: var(--primary);
+        }
+
+        .stat-number {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .feature-card {
+            border-radius: 30px;
+            padding: 2.5rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-card:not(.bg-primary):not(.bg-info):not(.bg-dark):hover {
+            box-shadow: 0 30px 70px rgba(99, 102, 241, 0.15);
+        }
+
+        .feature-card.bg-primary:hover {
+            box-shadow: 0 30px 70px rgba(99, 102, 241, 0.5);
+        }
+
+        .feature-card.bg-info:hover {
+            box-shadow: 0 30px 70px rgba(6, 182, 212, 0.5);
+        }
+
+        .feature-card.bg-dark:hover {
+            box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6);
+        }
+
+        .feature-card:hover .icon-square {
+            transform: scale(1.1);
+            transition: transform 0.3s ease;
+        }
+
+        .icon-square {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        img[alt="Stats"] {
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            min-height: 150px;
+        }
+
+        .blob {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: var(--primary);
+            filter: blur(80px);
+            opacity: 0.15;
+            z-index: -1;
+            border-radius: 50%;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+            padding: 15px 35px;
+            border-radius: 15px;
+            font-weight: 600;
+            color: white !important;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+            transition: 0.3s;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-3px);
+        }
+
+        .text-muted {
+            color: var(--text-muted) !important;
+        }
+    </style>
+</head>
+
+<body class="loading">
+
+    <div id="preloader" class="preloader-overlay">
+        <div class="preloader-brand">
+            <img th:src="@{/img/logo.png}" width="85" height="85" class="rounded mb-2" alt="Logo Compuedu">
+            <h1 class="preloader-title">Portal<span style="color: #6366f1;">Edu</span></h1>
+
+            <div class="preloader-progress-container">
+                <div class="preloader-progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img th:src="@{/img/logo.png}" width="40" height="40" class="rounded me-2 d-inline-block align-top"
+                    alt="">
+                <span class="fw-bold text-dark">Portal<span class="text-primary">Edu</span></span>
+            </a>
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="#features">Beneficios</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#steps">¿Cómo funciona?</a></li>
+                    <li class="nav-item ms-lg-3">
+                        <a th:href="@{/login}" class="btn fw-bold text-primary">Ingresar</a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a th:href="@{/registro}" class="btn btn-nav-register rounded-pill px-4 fw-bold">Registrarse</a>
+                    </li>
+                    <li class="nav-item me-3">
+                        <button id="theme-toggle" class="btn btn-link text-primary p-0 shadow-none">
+                            <i class="fas fa-moon fs-4" id="theme-icon"></i>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div id="heroCarousel" class="carousel slide carousel-fade hero-carousel-container" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active" style="background: url('/img/home.png') center/cover;">
+                <div class="container h-100 d-flex align-items-center">
+                    <div class="row w-100">
+                        <div class="col-lg-8" data-aos="fade-right">
+                            <h1 class="hero-title">Impulsa tu <span class="text-primary">Éxito</span> con PortalEdu</h1>
+                            <p class="hero-lead my-4">Gestión académica simplificada para la comunidad Compuedu.
+                                Inscríbete y descarga tus certificados al instante.</p>
+                            <div class="d-flex gap-3">
+                                <a th:href="@{/registro}" class="btn btn-primary btn-lg px-5 shadow-lg">Comenzar</a>
+                                <a href="#features" class="btn btn-outline-light btn-lg px-4">Explorar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="carousel-item" style="background: url('/img/home1.jpg') center/cover;">
+                <div class="container h-100 d-flex align-items-center">
+                    <div class="row w-100">
+                        <div class="col-lg-8">
+                            <h1 class="hero-title">Becas <span class="text-warning">Vigentes 2026</span></h1>
+                            <p class="hero-lead my-4">No pierdas la oportunidad de financiar tus estudios. Más de 50
+                                convocatorias abiertas hoy mismo.</p>
+                            <button class="btn btn-warning btn-lg fw-bold">Ver Convocatorias</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+    </div>
+
+    <section class="stats-section">
+        <div class="container">
+            <div class="row text-center g-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="stat-card">
+                        <div class="stat-number text-info">
+                            <span class="count-me" data-count="1200">0</span>
+                            <span>+</span>
+                        </div>
+                        <small class="opacity-75 text-uppercase ls-1 text-muted">Estudiantes Activos</small>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="stat-card">
+                        <div class="stat-number text-warning">
+                            <span class="count-me" data-count="50">0</span>
+                            <span>+</span>
+                        </div>
+                        <small class="opacity-75 text-uppercase ls-1 text-muted">Becas Disponibles</small>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="stat-card">
+                        <div class="stat-number text-success">
+                            <span class="count-me" data-count="24">0</span>
+                            <span>/7</span>
+                        </div>
+                        <small class="opacity-75 text-uppercase ls-1 text-muted">Acceso al Sistema</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="py-5 my-5">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h6 class="text-primary fw-bold text-uppercase">¿Por qué elegirnos?</h6>
+                <h2 class="fw-bold display-6">Todo lo que necesitas en un solo lugar</h2>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-8" data-aos="fade-up">
+                    <div class="feature-card h-100 d-flex align-items-center">
+                        <div class="row align-items-center w-100 p-3">
+                            <div class="col-md-7">
+                                <div class="icon-square text-primary"><i class="fas fa-graduation-cap fs-4"></i></div>
+                                <h4>Gestión de Becas 2026</h4>
+                                <p class="text-muted">Accede a más de 50 convocatorias vigentes con filtros inteligentes
+                                    por promedio y estrato.</p>
+                            </div>
+                            <div class="col-md-5 d-none d-md-block">
+                                <img th:src="@{/img/becas.jpeg}" class="img-fluid rounded-4 shadow-sm" alt="Stats">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-card h-100 bg-primary text-white border-0 shadow-lg">
+                        <div class="icon-square bg-white text-primary shadow-sm"><i class="fas fa-bolt"></i></div>
+                        <h4 class="text-white">Procesos Rápidos</h4>
+                        <p class="opacity-75">Inscripciones validadas en segundos gracias a nuestro motor de
+                            automatización.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-card h-100 bg-info text-white border-0 shadow-lg">
+                        <div class="icon-square bg-white text-info shadow-sm"><i class="fas fa-shield-alt"></i></div>
+                        <h4 class="text-white">Seguridad de Datos</h4>
+                        <p class="opacity-75">Protegemos tu información con encriptación de última generación y
+                            protocolos avanzados.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-8" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-card h-100 bg-dark text-white border-0 shadow-lg">
+                        <div class="row align-items-center w-100 p-3">
+                            <div class="col-md-8">
+                                <div class="icon-square bg-primary text-white mb-3"><i class="fas fa-users"></i></div>
+                                <h4 class="text-white">Comunidad Activa</h4>
+                                <p class="opacity-75">Únete a los estudiantes que ya están gestionando su futuro
+                                    académico hoy mismo.</p>
+                                <div class="mt-3">
+                                    <span class="badge bg-primary">+20 Nuevos este mes</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center d-none d-md-block">
+                                <i class="fas fa-user-friends fa-5x opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="steps" class="py-5 bg-light">
+        <div class="container py-5">
+            <div class="row align-items-center">
+                <div class="col-lg-5" data-aos="fade-right">
+                    <h2 class="fw-bold mb-4">Tu camino al éxito en 3 pasos</h2>
+                    <p class="text-muted mb-4">Hemos simplificado el proceso para que no pierdas tiempo en trámites
+                        administrativos.</p>
+
+                    <div class="d-flex mb-4">
+                        <div class="me-3">
+                            <div class="step-circle">1</div>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold">Crea tu cuenta</h5>
+                            <p class="text-muted small">Regístrate en menos de 2 minutos con tus datos básicos.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex mb-4">
+                        <div class="me-3">
+                            <div class="step-circle bg-secondary">2</div>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold">Aplica a convocatorias</h5>
+                            <p class="text-muted small">Selecciona las becas o cursos de tu interés.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <div class="step-circle bg-info">3</div>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold">Obtén resultados</h5>
+                            <p class="text-muted small">Descarga tu comprobante y sigue tu proceso.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7" data-aos="fade-left">
+                    <img th:src="@{/img/register.png}" alt="Pasos" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 mb-3">
+                    <a class="d-flex align-items-center text-dark text-decoration-none mb-3" href="#">
+                        <img th:src="@{/img/logo.png}" width="40" height="40" class="rounded me-2" alt="">
+                        <span class="fw-bold h5 mb-0">PortalEdu</span>
+                    </a>
+                    <p class="text-muted small">Plataforma integral para la gestión de servicios académicos y bienestar
+                        estudiantil.</p>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <h6 class="fw-bold mb-3">Plataforma</h6>
+                    <ul class="list-unstyled text-muted small">
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Inicio</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Convocatorias</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Soporte</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <h6 class="fw-bold mb-3">Legal</h6>
+                    <ul class="list-unstyled text-muted small">
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Privacidad</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Términos</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h6 class="fw-bold mb-3">Suscríbete</h6>
+                    <form action="#">
+                        <div class="input-group mb-3">
+                            <input type="email" class="form-control border-0 bg-white shadow-sm"
+                                placeholder="Tu correo electrónico">
+                            <button class="btn btn-primary" type="button"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="text-center pt-4 mt-4 border-top">
+                <p class="text-muted small mb-0">&copy; 2025 Portal Académico. Hecho con <i
+                        class="fas fa-heart text-danger"></i> por el equipo de TI.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <script>
+        // SCRIPT DEL PRELOADER ACTUALIZADO
+        window.addEventListener('DOMContentLoaded', () => {
+            const preloader = document.getElementById('preloader');
+
+            // Sincronizado con los 2 segundos que tarda la barra en llenarse en CSS
+            setTimeout(() => {
+                preloader.classList.add('hidden');
+                document.body.classList.remove('loading');
+
+                setTimeout(() => {
+                    preloader.remove();
+                }, 800);
+            }, 2000);
+        });
+
+        // Inicializar animaciones de scroll
+        AOS.init({
+            once: true,
+            offset: 100
+        });
+
+        // Script para cambiar el navbar al hacer scroll
+        const navbar = document.querySelector('.navbar');
+        window.onscroll = () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        };
+
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const body = document.documentElement;
+
+        if (localStorage.getItem('theme') === 'dark') {
+            body.setAttribute('data-theme', 'dark');
+            themeIcon.classList.replace('fa-moon', 'fa-sun');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Función para animar contadores cuando son visibles
+        const stats = document.querySelectorAll('.count-me');
+        let statsCounted = false;
+
+        window.addEventListener('scroll', () => {
+            if (statsCounted) return;
+
+            const statsSection = document.querySelector('.stats-section');
+            if (statsSection) {
+                const sectionPosition = statsSection.getBoundingClientRect().top;
+                const screenPosition = window.innerHeight / 1.3;
+
+                if (sectionPosition < screenPosition) {
+                    statsCounted = true;
+
+                    stats.forEach(stat => {
+                        const updateCount = () => {
+                            const target = +stat.getAttribute('data-count');
+                            const count = +stat.innerText;
+                            const increment = target / 50;
+
+                            if (count < target) {
+                                stat.innerText = Math.ceil(count + increment);
+                                setTimeout(updateCount, 20);
+                            } else {
+                                stat.innerText = target;
+                            }
+                        };
+                        updateCount();
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
