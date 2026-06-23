@@ -131,12 +131,25 @@
             z-index: 1;
         }
 
+/* --- CORRECCIÓN DE ÁREA CONSTANTE PARA EL CAROUSEL --- */
         .carousel-item {
-            padding: 160px 0 120px 0;
+            height: 75vh; /* Ocupará siempre el 75% de la altura de la pantalla */
+            min-height: 500px; /* Evita que se encoja demasiado en pantallas pequeñas */
             background-size: cover !important;
             background-position: center center !important;
             background-repeat: no-repeat !important;
             position: relative;
+            
+            /* Permite centrar el contenido verticalmente dentro del área fija */
+            display: flex;
+            align-items: center; 
+        }
+
+        /* Ajuste necesario para Bootstrap cuando usamos flexbox en carousel-item */
+        .carousel-item.active,
+        .carousel-item-next,
+        .carousel-item-prev {
+            display: flex !important;
         }
 
         .carousel-item::before {
@@ -578,4 +591,4 @@
     </script>
 </body>
 
-</html>
+</html>     
